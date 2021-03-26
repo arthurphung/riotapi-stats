@@ -10,7 +10,6 @@ module.exports = router
 router.get('/summoner', async (req, res, next) => {
   try {
     let {username} = req.query
-    console.log(riotKey, 'TESTESTETSET')
     console.log('username here ==>', username)
     let url = `https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${username}?api_key=${riotKey}`
 
@@ -33,7 +32,7 @@ router.get('/matches', async (req, res, next) => {
     const response = await axios.get(url)
     let matches = response.data
     res.json(matches)
-    console.log(matches)
+    // console.log(matches)
   } catch (error) {
     next(error)
   }
@@ -49,7 +48,7 @@ router.get('/gameDetails', async (req, res, next) => {
     const response = await axios.get(url)
     let data = response.data
     res.json(data)
-    console.log(data)
+    // console.log(data)
   } catch (error) {
     next(error)
   }
