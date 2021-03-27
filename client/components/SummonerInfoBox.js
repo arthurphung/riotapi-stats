@@ -5,6 +5,7 @@ import {fetchMatchDetails} from '../store/summoner'
 import {Container} from 'react-bootstrap'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+import Table from 'react-bootstrap/Table'
 
 class SummonerInfoBox extends React.Component {
   componentDidMount() {
@@ -17,50 +18,8 @@ class SummonerInfoBox extends React.Component {
     console.log(matchSet, 'MATCHSET DATA')
 
     return (
-      <div>
-        <Container>
-          <Row>
-            <div className="images">
-              {matchSet.map(element => (
-                <img
-                  className="img"
-                  key={element.id}
-                  src={`http://ddragon.leagueoflegends.com/cdn/11.6.1/img/champion/${
-                    element.championName
-                  }.png`}
-                />
-              ))}
-            </div>
-            <Col>
-              {matchSet.map(element => (
-                <div className="m-5 p-4 text-center" key={element.id}>
-                  {element.gameMode}
-                </div>
-              ))}
-            </Col>
-            <Col>
-              {matchSet.map(element => (
-                <div className="m-5 p-4 text-center" key={element.id}>
-                  {element.championName}
-                </div>
-              ))}
-            </Col>
-            <Col>
-              {matchSet.map(element => (
-                <div className="m-5 p-4 text-center" key={element.id}>
-                  {element.teamOutcome}
-                </div>
-              ))}
-            </Col>
-            <Col>
-              {matchSet.map(element => (
-                <div className="m-5 p-4 text-center w-100" key={element.id}>
-                  {`${element.kills} / ${element.deaths} / ${element.assists}`}
-                </div>
-              ))}
-            </Col>
-          </Row>
-        </Container>
+      <div className="SummonerInfoBox">
+        <Table />
         {/* <Container>
                     {matchSet.map(element => (
                         <div className="align-top" key={element.id}>
