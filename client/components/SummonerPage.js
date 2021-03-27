@@ -8,6 +8,10 @@ import {
   createPlayerBlock
 } from '../store/summoner'
 
+import Button from 'react-bootstrap/Button'
+import InputGroup from 'react-bootstrap/InputGroup'
+import FormControl from 'react-bootstrap/FormControl'
+
 let championByIdCache = {}
 let championJson = {}
 
@@ -287,21 +291,23 @@ export class SummonerPage extends React.Component {
   }
 
   render() {
+    console.log(this.state.value)
     return (
       <div>
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            Summoner Name
-            <input
-              type="text"
-              value={this.state.value}
-              onChange={this.handleChange}
-            />
-          </label>
-          <input type="submit" value="Submit" />
-        </form>
-
-        {/* <SummonerInfoBox /> */}
+        <InputGroup className="mt-3 w-50">
+          <FormControl
+            placeholder="Summoner's username"
+            aria-label="Summoner's username"
+            aria-describedby="basic-addon2"
+            value={this.state.value}
+            onChange={this.handleChange}
+          />
+          <InputGroup.Append>
+            <Button variant="outline-secondary" onClick={this.handleSubmit}>
+              Search
+            </Button>
+          </InputGroup.Append>
+        </InputGroup>
       </div>
     )
   }
