@@ -19,3 +19,11 @@ form div {
   margin: 1em;
   display: inline-block;
 }
+
+.img {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 50%;
+  margin: 8.1mm;
+}

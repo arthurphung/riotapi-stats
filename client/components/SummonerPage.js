@@ -1,5 +1,12 @@
-import axios from 'axios'
 import React from 'react'
+import {connect} from 'react-redux'
+
+import {
+  fetchSummonerByName,
+  fetchMatchListByAccId,
+  fetchMatchDetailsByGameId,
+  createPlayerBlock
+} from '../store/summoner'
 
 let championByIdCache = {}
 let championJson = {}
@@ -9,24 +16,31 @@ export class SummonerPage extends React.Component {
     super()
     this.state = {
       value: '',
-      accId: '',
+      accountId: '',
       gameId: '',
-      champion: 0,
+      champion: '',
       gameMode: '',
       championName: '',
-      teamId: 0,
+      teamId: '',
       teamOutcome: '',
-      kills: 0,
-      deaths: 0,
-      assists: 0
+      kills: '',
+      deaths: '',
+      assists: '',
+      matchDetails: ''
     }
 
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
-    this.fetchSummonerByName = this.fetchSummonerByName.bind(this)
+    this.search = this.search.bind(this)
     this.getChampionByID = this.getChampionByID.bind(this)
     this.getLatestChampionDDragon = this.getLatestChampionDDragon.bind(this)
     this.getChampionByKey = this.getChampionByKey.bind(this)
+    this.getMatchDetails = this.getMatchDetails.bind(this)
+    this.getMatchList = this.getMatchList.bind(this)
+    this.getMatchOutcome = this.getMatchOutcome.bind(this)
+    this.getSummoner = this.getSummoner.bind(this)
+    this.getChampionName = this.getChampionName.bind(this)
+    this.createSummonerBox = this.createSummonerBox.bind(this)
   }
 
   async getLatestChampionDDragon(language = 'en_US') {
@@ -82,74 +96,180 @@ export class SummonerPage extends React.Component {
   //   console.log(brand);
   // }
 
-  async fetchSummonerByName() {
+  async getSummoner() {
+    await this.props.fetchSummonerByName({
+      params: {username: this.state.value}
+    })
+    console.log('SUMMONER NAME DATA', this.props.summonerData.accountNameData)
+
+    this.setState({
+      accountId: this.props.summonerData.accountNameData.accountId
+    })
+  }
+
+  async getMatchList() {
     try {
-      //Call API to get Summoner's Account ID
-      let {data} = await axios.get('/api/search/summoner', {
-        params: {username: this.state.value}
+      await this.props.fetchMatchListByAccId({
+        params: {accountId: this.state.accountId}
       })
-      console.log('SUMMONER NAME DATA', data)
+      console.log(
+        'SUMMONER MATCH LIST DATA',
+        this.props.summonerData.accountMatchList
+      )
 
+      //Storing first 10 matches
+      let matchArray = []
+      let championArray = []
+      for (let i = 0; i < 10; i++) {
+        matchArray.push(
+          this.props.summonerData.accountMatchList.matches[i].gameId
+        )
+        championArray.push(
+          this.props.summonerData.accountMatchList.matches[i].champion
+        )
+      }
       this.setState({
-        accId: data.accountId
+        gameId: matchArray,
+        champion: championArray
       })
-      //Call API to get Summoner's Game ID's
-      let matches = await axios.get('/api/search/matches', {
-        params: {accId: this.state.accId}
-      })
-      console.log('MATCHLIST DATA', matches)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
-      let startIdx = matches.data.startIndex
-      this.setState({
-        gameId: matches.data.matches[startIdx].gameId,
-        champion: matches.data.matches[startIdx].champion
-      })
+  async getMatchDetails() {
+    try {
+      let matchDetailsArray = []
+      let gameModesArray = []
+      let teamIdArray = []
+      let killsArray = []
+      let deathsArray = []
+      let assistsArray = []
 
-      //Call API to get Summoner's Match Details
-      let games = await axios.get('api/search/gameDetails', {
-        params: {gameId: this.state.gameId}
-      })
-      console.log('GAME DETAILS 1', games)
+      for (let i = 0; i < this.state.gameId.length; i++) {
+        await this.props.fetchMatchDetailsByGameId({
+          params: {gameId: this.state.gameId[i]}
+        })
 
-      this.setState({
-        gameMode: games.data.gameMode
-      })
+        matchDetailsArray.push(this.props.summonerData.accountMatchDetails)
+        this.setState({
+          matchDetails: matchDetailsArray
+        })
+
+        gameModesArray.push(
+          this.props.summonerData.accountMatchDetails.gameMode
+        )
+      }
 
       //Get Summoner Team ID, K/D/A, ...
-      for (let i = 0; i < games.data.participants.length; i++) {
-        if (games.data.participants[i].championId === this.state.champion) {
-          this.setState({
-            teamId: games.data.participants[i].teamId,
-            kills: games.data.participants[i].stats.kills,
-            deaths: games.data.participants[i].stats.deaths,
-            assists: games.data.participants[i].stats.assists
-          })
+      for (let i = 0; i < this.state.matchDetails.length; i++) {
+        for (
+          let j = 0;
+          j < this.state.matchDetails[i].participants.length;
+          j++
+        ) {
+          if (
+            this.state.matchDetails[i].participants[j].championId ===
+            this.state.champion[i]
+          ) {
+            teamIdArray.push(this.state.matchDetails[i].participants[j].teamId)
+            killsArray.push(
+              this.state.matchDetails[i].participants[j].stats.kills
+            )
+            deathsArray.push(
+              this.state.matchDetails[i].participants[j].stats.deaths
+            )
+            assistsArray.push(
+              this.state.matchDetails[i].participants[j].stats.assists
+            )
+          }
         }
       }
-
-      console.log("SUMMONER'S TEAM ID", this.state.teamId)
-
-      //Get Match Outcome W/L
-      for (let i = 0; i < games.data.teams.length; i++) {
-        if (games.data.teams[i].teamId === this.state.teamId) {
-          this.setState({
-            teamOutcome: games.data.teams[i].win
-          })
-        }
-      }
-
-      //Get champion name
-      let championInfo = await this.getChampionByKey(
-        this.state.champion,
-        'en_US'
-      )
-      console.log(championInfo)
-      let championName = championInfo.id
-      console.log(championName)
 
       this.setState({
-        championName: championInfo.id
+        gameMode: gameModesArray,
+        teamId: teamIdArray,
+        kills: killsArray,
+        deaths: deathsArray,
+        assists: assistsArray
       })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  getMatchOutcome() {
+    try {
+      let matchOutcomeArr = []
+      //Get Match Outcome W/L
+      for (let i = 0; i < this.state.matchDetails.length; i++) {
+        for (let j = 0; j < this.state.matchDetails[i].teams.length; j++) {
+          if (
+            this.state.matchDetails[i].teams[j].teamId === this.state.teamId[i]
+          ) {
+            matchOutcomeArr.push(this.state.matchDetails[i].teams[j].win)
+          }
+        }
+      }
+
+      this.setState({
+        teamOutcome: matchOutcomeArr
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  async getChampionName() {
+    try {
+      //Get champion name
+      let championNameArr = []
+      for (let i = 0; i < this.state.champion.length; i++) {
+        let championInfo = await this.getChampionByKey(
+          this.state.champion[i],
+          'en_US'
+        )
+        // console.log(championInfo)
+        championNameArr.push(championInfo.id)
+      }
+
+      this.setState({
+        championName: championNameArr
+      })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  async createSummonerBox() {
+    try {
+      for (let i = 0; i < 10; i++) {
+        await this.props.createPlayerBlock({
+          gameMode: this.state.gameMode[i],
+          championName: this.state.championName[i],
+          teamOutcome: this.state.teamOutcome[i],
+          kills: this.state.kills[i],
+          deaths: this.state.deaths[i],
+          assists: this.state.assists[i],
+          gameId: this.state.gameId[i]
+        })
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  async search() {
+    try {
+      await this.getSummoner()
+      await this.getMatchList()
+      await this.getMatchDetails()
+      await this.getMatchOutcome()
+      await this.getChampionName()
+      await this.createSummonerBox()
+
+      console.log(this.props.summonerData)
+      console.log(this.state)
     } catch (error) {
       console.log(error)
     }
@@ -162,38 +282,46 @@ export class SummonerPage extends React.Component {
   }
 
   handleSubmit(event) {
-    this.fetchSummonerByName()
+    this.search()
     event.preventDefault()
   }
 
   render() {
-    // console.log('PROPS HERE', this.props)
-    // console.log('STATE HERE', this.state)
-    const imgsrc = `http://ddragon.leagueoflegends.com/cdn/11.6.1/img/champion/${
-      this.state.championName
-    }.png`
-
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          Summoner Name
-          <input
-            type="text"
-            value={this.state.value}
-            onChange={this.handleChange}
-          />
-        </label>
-        <input type="submit" value="Submit" />
-        <h1>{this.state.gameMode}</h1>
-        <h1>{this.state.champion}</h1>
-        <img src={imgsrc} />
-        <h1>{this.state.teamOutcome}</h1>
-        <h2>{this.state.kills}</h2>
-        <h2>{this.state.deaths}</h2>
-        <h2>{this.state.assists}</h2>
-      </form>
+      <div>
+        <form onSubmit={this.handleSubmit}>
+          <label>
+            Summoner Name
+            <input
+              type="text"
+              value={this.state.value}
+              onChange={this.handleChange}
+            />
+          </label>
+          <input type="submit" value="Submit" />
+        </form>
+
+        {/* <SummonerInfoBox /> */}
+      </div>
     )
   }
 }
 
-export default SummonerPage
+const mapState = state => {
+  return {
+    summonerData: state.summoner
+  }
+}
+
+const mapDispatch = dispatch => {
+  return {
+    fetchSummonerByName: summoner => dispatch(fetchSummonerByName(summoner)),
+    fetchMatchListByAccId: accountId =>
+      dispatch(fetchMatchListByAccId(accountId)),
+    fetchMatchDetailsByGameId: gameId =>
+      dispatch(fetchMatchDetailsByGameId(gameId)),
+    createPlayerBlock: details => dispatch(createPlayerBlock(details))
+  }
+}
+
+export default connect(mapState, mapDispatch)(SummonerPage)

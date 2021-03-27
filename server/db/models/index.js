@@ -1,4 +1,4 @@
-const Champions = require('./champions')
+const Summoners = require('./summoners')
 
 /**
  * If we had any associations to make, this would be a great place to put them!
@@ -14,5 +14,5 @@ const Champions = require('./champions')
  * instead of: const User = require('../db/models/user')
  */
 module.exports = {
-  Champions
+  Summoners
 }
