@@ -7,6 +7,8 @@ const GET_CHAMPION_BY_KEY = 'GET_CHAMPION_BY_KEY'
 const GET_LATEST_CHAMPION_DDRAGON = 'GET_LATEST_CHAMPION_DDRAGON'
 const ADD_PLAYER_BLOCK = 'ADD_PLAYER_BLOCK'
 const GET_MATCH_DETAILS = 'GET_MATCH_DETAILS'
+const ADD_MATCH_TEAMMATES = 'GET_MATCH_TEAMMATES'
+const GET_TEAMS = 'GET_TEAMS'
 
 export const findSummoner = summoner => ({
   type: FIND_SUMMONER,
@@ -46,6 +48,16 @@ export const addPlayerBlock = details => ({
 export const getMatchDetails = details => ({
   type: GET_MATCH_DETAILS,
   details
+})
+
+export const addMatchTeammates = ids => ({
+  type: ADD_MATCH_TEAMMATES,
+  ids
+})
+
+export const getTeams = ids => ({
+  type: GET_TEAMS,
+  ids
 })
 
 export const fetchSummonerByName = summoner => {
@@ -102,8 +114,47 @@ export const fetchMatchDetails = () => {
   return async dispatch => {
     try {
       const {data} = await axios.get('/api/search/matchDetails')
-      // console.log(data)
+      console.log(data)
       dispatch(getMatchDetails(data))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
+
+export const createMatchTeammates = ids => {
+  return async dispatch => {
+    try {
+      const {data} = await axios.post('/api/search/teams', ids)
+      // console.log(data)
+      dispatch(addMatchTeammates(data))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
+
+export const fetchMatchTeams = () => {
+  return async dispatch => {
+    try {
+      const {data} = await axios.get('/api/search/teams')
+
+      let teammates = data[0]
+      let opponents = data[1]
+
+      let teammatesArr = teammates.map(el => el.teammatesId)
+      let opponentsArr = opponents.map(el => el.opponentsId)
+
+      let reducedTeamArr = []
+      let reducedOppArr = []
+      let size = 5
+
+      for (let i = 0; i < teammatesArr.length; i += size) {
+        reducedTeamArr.push(teammatesArr.slice(i, i + size))
+        reducedOppArr.push(opponentsArr.slice(i, i + size))
+      }
+
+      dispatch(getTeams(result))
     } catch (error) {
       console.log(error)
     }
@@ -114,8 +165,8 @@ const initialState = {
   accountNameData: [],
   accountMatchList: [],
   accountMatchDetails: [],
-  matchDetailsBlock: [],
-  matchSet: []
+  matchSet: [],
+  teamSet: []
 }
 
 // Take a look at app/redux/index.js to see where this reducer is
@@ -131,11 +182,11 @@ export default function summonerReducer(state = initialState, action) {
     case GET_SUMMONER_MATCH_DETAILS: {
       return {...state, accountMatchDetails: action.gameId}
     }
-    case ADD_PLAYER_BLOCK: {
-      return {...state, matchDetailsBlock: action.details}
-    }
     case GET_MATCH_DETAILS: {
       return {...state, matchSet: action.details}
+    }
+    case GET_TEAMS: {
+      return {...state, teamSet: action.ids}
     }
     default:
       return state

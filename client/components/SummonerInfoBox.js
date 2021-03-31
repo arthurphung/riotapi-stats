@@ -1,6 +1,6 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {fetchMatchDetails} from '../store/summoner'
+import {fetchMatchDetails, fetchMatchTeams} from '../store/summoner'
 
 import {Container} from 'react-bootstrap'
 import Row from 'react-bootstrap/Row'
@@ -12,95 +12,82 @@ class SummonerInfoBox extends React.Component {
   }
 
   render() {
-    console.log(this.props)
     const matchSet = this.props.summonerData.matchSet
     console.log(matchSet, 'MATCHSET DATA')
 
     return (
-      <div>
+      <div className="root">
         <Container>
-          <Row>
-            <div className="images">
-              {matchSet.map(element => (
+          {matchSet.map(match => (
+            <Row key={match.id} className="m-5">
+              <Col>
+                <Row>{match.gameMode}</Row>
+                <Row>{match.teamOutcome}</Row>
+              </Col>
+              <Col>
                 <img
-                  className="img"
-                  key={element.id}
-                  src={`http://ddragon.leagueoflegends.com/cdn/11.6.1/img/champion/${
-                    element.championName
+                  src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/champion/${
+                    match.championName
                   }.png`}
                 />
-              ))}
-            </div>
-            <Col>
-              {matchSet.map(element => (
-                <div className="m-5 p-4 text-center" key={element.id}>
-                  {element.gameMode}
-                </div>
-              ))}
-            </Col>
-            <Col>
-              {matchSet.map(element => (
-                <div className="m-5 p-4 text-center" key={element.id}>
-                  {element.championName}
-                </div>
-              ))}
-            </Col>
-            <Col>
-              {matchSet.map(element => (
-                <div className="m-5 p-4 text-center" key={element.id}>
-                  {element.teamOutcome}
-                </div>
-              ))}
-            </Col>
-            <Col>
-              {matchSet.map(element => (
-                <div className="m-5 p-4 text-center w-100" key={element.id}>
-                  {`${element.kills} / ${element.deaths} / ${element.assists}`}
-                </div>
-              ))}
-            </Col>
-          </Row>
+              </Col>
+              <Col>{`${match.kills}/${match.deaths}/${match.assists}`}</Col>
+              <Col sm={2}>
+                <Row>
+                  <img
+                    src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
+                      match.item0
+                    }.png`}
+                  />
+                  <img
+                    src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
+                      match.item1
+                    }.png`}
+                  />
+                  <img
+                    src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
+                      match.item2
+                    }.png`}
+                  />
+                  <img
+                    src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
+                      match.item3
+                    }.png`}
+                  />
+                  <img
+                    src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
+                      match.item4
+                    }.png`}
+                  />
+                  <img
+                    src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
+                      match.item5
+                    }.png`}
+                  />
+                  <img
+                    src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
+                      match.item6
+                    }.png`}
+                  />
+                </Row>
+              </Col>
+              <Col>
+                <Row>{match.teammate1}</Row>
+                <Row>{match.teammate2}</Row>
+                <Row>{match.teammate3}</Row>
+                <Row>{match.teammate4}</Row>
+                <Row>{match.teammate5}</Row>
+              </Col>
+              <Col>
+                <Row>{match.opponent1}</Row>
+                <Row>{match.opponent2}</Row>
+                <Row>{match.opponent3}</Row>
+                <Row>{match.opponent4}</Row>
+                <Row>{match.opponent5}</Row>
+              </Col>
+            </Row>
+          ))}
         </Container>
-        {/* <Container>
-                    {matchSet.map(element => (
-                        <div className="align-top" key={element.id}>
-                            {element.championName}
-                        </div>
-                    ))}
-                </Container> */}
-        {/* <Container>
-                    {matchSet.map(element => (
-                        <img key={element.id} src={`http://ddragon.leagueoflegends.com/cdn/11.6.1/img/champion/${element.championName}.png`} />
-                    ))}
-                </Container> */}
-        {/* <Container>
-                    {matchSet.map(element => (
-                        <div className="text-left" key={element.id}>
-                            {element.teamOutcome}
-                        </div>
-                    ))}
-                </Container> */}
-        {/* <Container>
-                    {matchSet.map(element => (
-                        <div className="text-left" key={element.id}>
-                            {element.kills}
-                        </div>
-                    ))}
-                </Container>
-                <Container>
-                {matchSet.map(element => (
-                        <div className="text-left" key={element.id}>
-                            {element.deaths}
-                        </div>
-                    ))}
-                </Container>
-                <Container>
-                {matchSet.map(element => (
-                        <div className="text-left" key={element.id}>
-                            {element.assists}
-                        </div>
-                    ))}
-                </Container> */}
       </div>
     )
   }

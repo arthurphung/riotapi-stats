@@ -29,6 +29,86 @@ const Summoners = db.define('summoners', {
   assists: {
     type: Sequelize.INTEGER,
     allowNull: false
+  },
+  champLevel: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  spell1: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  spell2: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  item0: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  item1: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  item2: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  item3: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  item4: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  item5: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  item6: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  teammate1: {
+    type: Sequelize.TEXT,
+    allowNull: false
+  },
+  teammate2: {
+    type: Sequelize.TEXT,
+    allowNull: false
+  },
+  teammate3: {
+    type: Sequelize.TEXT,
+    allowNull: false
+  },
+  teammate4: {
+    type: Sequelize.TEXT,
+    allowNull: false
+  },
+  teammate5: {
+    type: Sequelize.TEXT,
+    allowNull: false
+  },
+  opponent1: {
+    type: Sequelize.TEXT,
+    allowNull: false
+  },
+  opponent2: {
+    type: Sequelize.TEXT,
+    allowNull: false
+  },
+  opponent3: {
+    type: Sequelize.TEXT,
+    allowNull: false
+  },
+  opponent4: {
+    type: Sequelize.TEXT,
+    allowNull: false
+  },
+  opponent5: {
+    type: Sequelize.TEXT,
+    allowNull: false
   }
 })
 
