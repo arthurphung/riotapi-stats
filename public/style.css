@@ -1,5 +1,6 @@
 body {
   font-family: sans-serif;
+  background-color: #2b2d42 !important;
 }
 
 a {
@@ -20,10 +21,13 @@ form div {
   display: inline-block;
 }
 
-.img {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  width: 50%;
-  margin: 8.1mm;
+div {
+  display: block;
+}
+
+img {
+  vertical-align: middle;
+  border-style: none;
+  width: 48px;
+  height: auto;
 }
