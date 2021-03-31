@@ -152,7 +152,7 @@ export class SummonerPage extends React.Component {
       //Storing first 10 matches
       let matchArray = []
       let championArray = []
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 40; i++) {
         matchArray.push(
           this.props.summonerData.accountMatchList.matches[i].gameId
         )
@@ -459,7 +459,7 @@ export class SummonerPage extends React.Component {
 
   async createSummonerBox() {
     try {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 40; i++) {
         await this.props.createPlayerBlock({
           gameMode: this.state.gameMode[i],
           championName: this.state.championName[i],

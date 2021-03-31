@@ -1,5 +1,4 @@
 import axios from 'axios'
-import {element} from 'prop-types'
 const FIND_SUMMONER = 'FIND_SUMMONER'
 const FIND_SUMMONER_MATCH_LIST = 'FIND_SUMMONER_MATCH_LIST'
 const GET_SUMMONER_MATCH_DETAILS = 'GET_SUMMONER_MATCH_DETAILS'
