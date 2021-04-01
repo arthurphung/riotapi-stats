@@ -28,6 +28,11 @@ div {
 img {
   vertical-align: middle;
   border-style: none;
-  width: 48px;
+  width: 22px;
+  height: auto;
+}
+
+.championPicture img {
+  width: 44px;
   height: auto;
 }
