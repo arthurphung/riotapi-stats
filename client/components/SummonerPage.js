@@ -15,6 +15,8 @@ import FormControl from 'react-bootstrap/FormControl'
 
 let championByIdCache = {}
 let championJson = {}
+let spellByIdCache = []
+let spellJson = []
 
 export class SummonerPage extends React.Component {
   constructor() {
@@ -59,7 +61,7 @@ export class SummonerPage extends React.Component {
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
     this.search = this.search.bind(this)
-    this.getChampionByID = this.getChampionByID.bind(this)
+    // this.getChampionByID = this.getChampionByID.bind(this)
     this.getLatestChampionDDragon = this.getLatestChampionDDragon.bind(this)
     this.getChampionByKey = this.getChampionByKey.bind(this)
     this.getMatchDetails = this.getMatchDetails.bind(this)
@@ -73,6 +75,10 @@ export class SummonerPage extends React.Component {
     this.getTeams = this.getTeams.bind(this)
     this.getTeammates = this.getTeammates.bind(this)
     this.getOpponents = this.getOpponents.bind(this)
+    this.getLatestSummonerSpellsDDragon = this.getLatestSummonerSpellsDDragon.bind(
+      this
+    )
+    this.getSummonerSpellByKey = this.getSummonerSpellByKey.bind(this)
   }
 
   async getLatestChampionDDragon(language = 'en_US') {
@@ -95,6 +101,26 @@ export class SummonerPage extends React.Component {
     return championJson[language]
   }
 
+  async getLatestSummonerSpellsDDragon(language = 'en_US') {
+    if (spellJson[language]) return spellJson[language]
+
+    let response
+    let versionIndex = 0
+    do {
+      // I loop over versions because 9.22.1 is broken
+      const version = (await fetch(
+        'http://ddragon.leagueoflegends.com/api/versions.json'
+      ).then(async r => await r.json()))[versionIndex++]
+
+      response = await fetch(
+        `https://ddragon.leagueoflegends.com/cdn/${version}/data/${language}/summoner.json`
+      )
+    } while (!response.ok)
+
+    spellJson[language] = await response.json()
+    return spellJson[language]
+  }
+
   async getChampionByKey(key, language = 'en_US') {
     // Setup cache
     if (!championByIdCache[language]) {
@@ -107,16 +133,35 @@ export class SummonerPage extends React.Component {
         const champInfo = json.data[championName]
         championByIdCache[language][champInfo.key] = champInfo
       }
+      console.log(championByIdCache, 'CHAMP CACHE')
     }
 
     return championByIdCache[language][key]
   }
 
+  async getSummonerSpellByKey(key, language = 'en_US') {
+    // Setup cache
+    if (!spellByIdCache[language]) {
+      let json = await this.getLatestSummonerSpellsDDragon(language)
+
+      spellByIdCache[language] = {}
+      for (var spellName in json.data) {
+        if (!json.data.hasOwnProperty(spellName)) continue
+
+        const spellInfo = json.data[spellName]
+        spellByIdCache[language][spellInfo.key] = spellInfo
+      }
+      console.log(spellByIdCache, 'SPELL CACHE')
+    }
+
+    return spellByIdCache[language][key]
+  }
+
   // NOTE: IN DDRAGON THE ID IS THE CLEAN NAME!!! It's also super-inconsistent, and broken at times.
   // Cho'gath => Chogath, Wukong => Monkeyking, Fiddlesticks => Fiddlesticks/FiddleSticks (depending on what mood DDragon is in this patch)
-  async getChampionByID(name, language = 'en_US') {
-    return await this.getLatestChampionDDragon(language)[name]
-  }
+  // async getChampionByID(name, language = 'en_US') {
+  //   return await this.getLatestChampionDDragon(language)[name]
+  // }
 
   // async main() {
   //   const annie = await getChampionByKey(1, "en_US");
@@ -240,7 +285,7 @@ export class SummonerPage extends React.Component {
     }
   }
 
-  getSummonerSpells() {
+  async getSummonerSpells() {
     try {
       let spell1Array = []
       let spell2Array = []
@@ -265,9 +310,26 @@ export class SummonerPage extends React.Component {
         }
       }
 
+      let spell1NameArr = []
+      let spell2NameArr = []
+
+      for (let i = 0; i < spell1Array.length; i++) {
+        let spell1Info = await this.getSummonerSpellByKey(
+          spell1Array[i],
+          'en_US'
+        )
+
+        let spell2Info = await this.getSummonerSpellByKey(
+          spell2Array[i],
+          'en_US'
+        )
+        spell1NameArr.push(spell1Info.id)
+        spell2NameArr.push(spell2Info.id)
+      }
+
       this.setState({
-        spell1: spell1Array,
-        spell2: spell2Array
+        spell1: spell1NameArr,
+        spell2: spell2NameArr
       })
     } catch (error) {
       console.log(error)
