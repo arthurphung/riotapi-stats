@@ -35,11 +35,11 @@ const Summoners = db.define('summoners', {
     allowNull: false
   },
   spell1: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.TEXT,
     allowNull: false
   },
   spell2: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.TEXT,
     allowNull: false
   },
   item0: {
