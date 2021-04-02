@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const axios = require('axios')
-const {Summoners, Players} = require('../db/models')
+const {PlayerDetails, Summoners} = require('../db/models')
 require('dotenv').config()
 
 const riotKey = process.env.API_KEY
@@ -59,7 +59,7 @@ router.get('/gameDetails', async (req, res, next) => {
 router.post('/gameDetails', async (req, res, next) => {
   try {
     // console.log(req.body)
-    const createdPlayerBlock = await Summoners.create(req.body)
+    const createdPlayerBlock = await PlayerDetails.create(req.body)
     res.json(createdPlayerBlock)
   } catch (error) {
     next(error)
@@ -69,7 +69,7 @@ router.post('/gameDetails', async (req, res, next) => {
 //Get Game Details for 10 matches
 router.get('/matchDetails', async (req, res, next) => {
   try {
-    const matchSet = await Summoners.findAll()
+    const matchSet = await PlayerDetails.findAll()
 
     const teammates = await Players.findAll({
       attributes: ['teammatesId']
@@ -99,7 +99,7 @@ router.get('/matchDetails', async (req, res, next) => {
 //Post Teammates
 router.post('/teams', async (req, res, next) => {
   try {
-    console.log(req.body)
+    // console.log(req.body)
     const createdTeam = await Players.create(req.body)
     res.json(createdTeam)
   } catch (error) {
@@ -121,6 +121,17 @@ router.get('/teams', async (req, res, next) => {
     let results = []
     results.push(teammates, opponents)
     res.json(results)
+  } catch (error) {
+    next(error)
+  }
+})
+
+//Post Summoner Name for User model
+router.post('/summoner', async (req, res, next) => {
+  try {
+    console.log(req.body)
+    const createdSummonerName = await Summoners.create(req.body)
+    res.json(createdSummonerName)
   } catch (error) {
     next(error)
   }

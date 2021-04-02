@@ -9,6 +9,7 @@ const ADD_PLAYER_BLOCK = 'ADD_PLAYER_BLOCK'
 const GET_MATCH_DETAILS = 'GET_MATCH_DETAILS'
 const ADD_MATCH_TEAMMATES = 'GET_MATCH_TEAMMATES'
 const GET_TEAMS = 'GET_TEAMS'
+const ADD_SUMMONER_NAME = 'ADD_SUMMONER_NAME'
 
 export const findSummoner = summoner => ({
   type: FIND_SUMMONER,
@@ -55,9 +56,9 @@ export const addMatchTeammates = ids => ({
   ids
 })
 
-export const getTeams = ids => ({
-  type: GET_TEAMS,
-  ids
+export const addSummonerName = id => ({
+  type: ADD_SUMMONER_NAME,
+  id
 })
 
 export const fetchSummonerByName = summoner => {
@@ -134,27 +135,11 @@ export const createMatchTeammates = ids => {
   }
 }
 
-export const fetchMatchTeams = () => {
+export const createSummonerName = id => {
   return async dispatch => {
     try {
-      const {data} = await axios.get('/api/search/teams')
-
-      let teammates = data[0]
-      let opponents = data[1]
-
-      let teammatesArr = teammates.map(el => el.teammatesId)
-      let opponentsArr = opponents.map(el => el.opponentsId)
-
-      let reducedTeamArr = []
-      let reducedOppArr = []
-      let size = 5
-
-      for (let i = 0; i < teammatesArr.length; i += size) {
-        reducedTeamArr.push(teammatesArr.slice(i, i + size))
-        reducedOppArr.push(opponentsArr.slice(i, i + size))
-      }
-
-      dispatch(getTeams(result))
+      const createdSummonerName = await axios.post('/api/search/summoner', id)
+      dispatch(addSummonerName(createdSummonerName))
     } catch (error) {
       console.log(error)
     }

@@ -1,5 +1,5 @@
+const PlayerDetails = require('./playerdetails')
 const Summoners = require('./summoners')
-const Players = require('./players')
 
 /**
  * If we had any associations to make, this would be a great place to put them!
@@ -8,6 +8,8 @@ const Players = require('./players')
  *    BlogPost.belongsTo(User)
  */
 
+PlayerDetails.hasMany(Summoners)
+
 /**
  * We'll export all of our models here, so that any time a module needs a model,
  * we can just require it from 'db/models'
@@ -15,6 +17,6 @@ const Players = require('./players')
  * instead of: const User = require('../db/models/user')
  */
 module.exports = {
-  Summoners,
-  Players
+  PlayerDetails,
+  Summoners
 }

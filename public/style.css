@@ -1,6 +1,7 @@
 body {
   font-family: sans-serif;
   background-color: #2b2d42 !important;
+  color: white;
 }
 
 a {
@@ -30,9 +31,10 @@ img {
   border-style: none;
   width: 22px;
   height: auto;
+  margin: 2px;
 }
 
 .championPicture img {
-  width: 44px;
+  width: 48px;
   height: auto;
 }

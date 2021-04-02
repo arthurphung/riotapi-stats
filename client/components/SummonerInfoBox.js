@@ -1,6 +1,6 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {fetchMatchDetails, fetchMatchTeams} from '../store/summoner'
+import {fetchMatchDetails} from '../store/summoner'
 
 import {Container} from 'react-bootstrap'
 import Row from 'react-bootstrap/Row'
@@ -19,7 +19,7 @@ class SummonerInfoBox extends React.Component {
       <div className="root">
         <Container>
           {matchSet.map(match => (
-            <Row key={match.id} className="m-5 border border-white">
+            <Row key={match.id} className="m-2 border border-white">
               <Col sm={1} className="align-self-center">
                 <Row className="justify-content-center">{match.gameMode}</Row>
                 <Row className="justify-content-center">
@@ -27,9 +27,9 @@ class SummonerInfoBox extends React.Component {
                 </Row>
               </Col>
               <Col sm={2} className="align-self-center">
-                <Row>
-                  <Col>
-                    <Row className="justify-content-center championPicture">
+                <Row className="justify-content-center">
+                  <Col sm={6}>
+                    <Row className="justify-content-end championPicture">
                       <img
                         src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/champion/${
                           match.championName
@@ -37,7 +37,7 @@ class SummonerInfoBox extends React.Component {
                       />
                     </Row>
                   </Col>
-                  <Col>
+                  <Col sm={6}>
                     <Row>
                       <img
                         src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/spell/${
@@ -64,7 +64,7 @@ class SummonerInfoBox extends React.Component {
               <Col sm={4} className="align-self-center">
                 <Row>
                   <Col>
-                    <Row className="justify-content-sm-center">
+                    <Row className="justify-content-sm-end">
                       <img
                         src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
                           match.item0
@@ -81,7 +81,7 @@ class SummonerInfoBox extends React.Component {
                         }.png`}
                       />
                     </Row>
-                    <Row className="justify-content-sm-center">
+                    <Row className="justify-content-sm-end">
                       <img
                         src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
                           match.item3
@@ -99,12 +99,14 @@ class SummonerInfoBox extends React.Component {
                       />
                     </Row>
                   </Col>
-                  <Col>
-                    <img
-                      src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
-                        match.item6
-                      }.png`}
-                    />
+                  <Col className="align-self-center">
+                    <Row>
+                      <img
+                        src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
+                          match.item6
+                        }.png`}
+                      />
+                    </Row>
                   </Col>
                 </Row>
               </Col>
