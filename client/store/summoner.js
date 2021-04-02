@@ -10,6 +10,7 @@ const GET_MATCH_DETAILS = 'GET_MATCH_DETAILS'
 const ADD_MATCH_TEAMMATES = 'GET_MATCH_TEAMMATES'
 const GET_TEAMS = 'GET_TEAMS'
 const ADD_SUMMONER_NAME = 'ADD_SUMMONER_NAME'
+const GET_USER_DETAILS = 'GET_USER_DETAILS'
 
 export const findSummoner = summoner => ({
   type: FIND_SUMMONER,
@@ -59,6 +60,11 @@ export const addMatchTeammates = ids => ({
 export const addSummonerName = id => ({
   type: ADD_SUMMONER_NAME,
   id
+})
+
+export const getUserDetails = user => ({
+  type: GET_USER_DETAILS,
+  user
 })
 
 export const fetchSummonerByName = summoner => {
@@ -146,12 +152,26 @@ export const createSummonerName = id => {
   }
 }
 
+export const fetchUserDetails = summonerId => {
+  return async dispatch => {
+    try {
+      console.log(summonerId)
+      const {data} = await axios.get(`/api/search/${summonerId}`)
+      console.log(data)
+      dispatch(getUserDetails(data))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
+
 const initialState = {
   accountNameData: [],
   accountMatchList: [],
   accountMatchDetails: [],
   matchSet: [],
-  teamSet: []
+  teamSet: [],
+  userMatchSet: []
 }
 
 // Take a look at app/redux/index.js to see where this reducer is
@@ -172,6 +192,9 @@ export default function summonerReducer(state = initialState, action) {
     }
     case GET_TEAMS: {
       return {...state, teamSet: action.ids}
+    }
+    case GET_USER_DETAILS: {
+      return {...state, userMatchSet: action.user}
     }
     default:
       return state

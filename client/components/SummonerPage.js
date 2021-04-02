@@ -1,5 +1,6 @@
 import React from 'react'
 import {connect} from 'react-redux'
+import {Link} from 'react-router-dom'
 
 import {
   fetchSummonerByName,
@@ -599,9 +600,10 @@ export class SummonerPage extends React.Component {
     })
   }
 
-  handleSubmit(event) {
-    this.search()
+  async handleSubmit(event) {
+    await this.search()
     event.preventDefault()
+    window.location.href = `summoner/na/${this.state.summonerName}`
   }
 
   render() {
@@ -619,6 +621,12 @@ export class SummonerPage extends React.Component {
             <Button variant="outline-secondary" onClick={this.handleSubmit}>
               Search
             </Button>
+            <Link
+              to={`/summoner/na/${this.state.summonerName}`}
+              className="btn btn-primary"
+            >
+              Find
+            </Link>
           </InputGroup.Append>
         </InputGroup>
       </div>

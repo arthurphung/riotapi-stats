@@ -10,6 +10,7 @@ const Routes = () => {
     <Switch>
       <Route exact path="/" component={SummonerPage} />
       <Route path="/player" component={SummonerInfoBox} />
+      <Route path="/summoner/na/:summonerId" component={SummonerInfoBox} />
     </Switch>
   )
 }

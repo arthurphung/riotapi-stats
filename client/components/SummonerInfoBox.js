@@ -1,6 +1,6 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {fetchMatchDetails} from '../store/summoner'
+import {fetchMatchDetails, fetchUserDetails} from '../store/summoner'
 
 import {Container} from 'react-bootstrap'
 import Row from 'react-bootstrap/Row'
@@ -9,11 +9,14 @@ import Col from 'react-bootstrap/Col'
 class SummonerInfoBox extends React.Component {
   componentDidMount() {
     this.props.loadMatchSet()
+    this.props.loadUserMatchSet(this.props.match.params.summonerId)
   }
 
   render() {
     const matchSet = this.props.summonerData.matchSet
     console.log(matchSet, 'MATCHSET DATA')
+
+    console.log(this.props)
 
     return (
       <div className="root">
@@ -140,7 +143,8 @@ const mapState = state => {
 
 const mapDispatch = dispatch => {
   return {
-    loadMatchSet: () => dispatch(fetchMatchDetails())
+    loadMatchSet: () => dispatch(fetchMatchDetails()),
+    loadUserMatchSet: summonerId => dispatch(fetchUserDetails(summonerId))
   }
 }
 
