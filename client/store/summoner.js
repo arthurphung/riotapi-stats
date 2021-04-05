@@ -71,7 +71,6 @@ export const fetchSummonerByName = summoner => {
   return async dispatch => {
     try {
       const {data} = await axios.get('/api/search/summoner', summoner)
-      // console.log(data)
       dispatch(findSummoner(data))
     } catch (error) {
       console.log(error)
@@ -83,7 +82,6 @@ export const fetchMatchListByAccId = accountId => {
   return async dispatch => {
     try {
       const {data} = await axios.get('/api/search/matches', accountId)
-      // console.log(data)
       dispatch(findSummonerMatchList(data))
     } catch (error) {
       console.log(error)
@@ -95,7 +93,6 @@ export const fetchMatchDetailsByGameId = gameId => {
   return async dispatch => {
     try {
       const {data} = await axios.get('/api/search/gameDetails', gameId)
-      // console.log(data)
       dispatch(getSummonerMatchDetails(data))
     } catch (error) {
       console.log(error)
@@ -121,7 +118,6 @@ export const fetchMatchDetails = () => {
   return async dispatch => {
     try {
       const {data} = await axios.get('/api/search/matchDetails')
-      console.log(data)
       dispatch(getMatchDetails(data))
     } catch (error) {
       console.log(error)
@@ -133,7 +129,6 @@ export const createMatchTeammates = ids => {
   return async dispatch => {
     try {
       const {data} = await axios.post('/api/search/teams', ids)
-      // console.log(data)
       dispatch(addMatchTeammates(data))
     } catch (error) {
       console.log(error)
@@ -155,9 +150,7 @@ export const createSummonerName = id => {
 export const fetchUserDetails = summonerId => {
   return async dispatch => {
     try {
-      console.log(summonerId)
       const {data} = await axios.get(`/api/search/${summonerId}`)
-      console.log(data)
       dispatch(getUserDetails(data))
     } catch (error) {
       console.log(error)

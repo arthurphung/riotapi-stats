@@ -1,27 +1,53 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {fetchMatchDetails, fetchUserDetails} from '../store/summoner'
+import {fetchUserDetails} from '../store/summoner'
 
-import {Container} from 'react-bootstrap'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
+import {Container, Row, Col, Button, Image} from 'react-bootstrap'
 
 class SummonerInfoBox extends React.Component {
+  constructor() {
+    super()
+    this.state = {
+      visible: 10
+    }
+    this.showMoreMatches = this.showMoreMatches.bind(this)
+  }
+
   componentDidMount() {
-    this.props.loadMatchSet()
     this.props.loadUserMatchSet(this.props.match.params.summonerId)
   }
 
+  showMoreMatches() {
+    this.setState(prevState => ({
+      visible: prevState.visible + 10
+    }))
+  }
+
   render() {
-    const matchSet = this.props.summonerData.matchSet
+    const matchSet = this.props.summonerData.userMatchSet
     console.log(matchSet, 'MATCHSET DATA')
 
-    console.log(this.props)
-
     return (
-      <div className="root">
+      <div>
         <Container>
-          {matchSet.map(match => (
+          <Row className="m-2">
+            <Col sm={1}>
+              <Row className="summonerName justify-content-center">
+                {matchSet[0] !== undefined && matchSet[0].summonerName}
+              </Row>
+              <Row className="profileIcon justify-content-center">
+                {matchSet[0] !== undefined && (
+                  <Image
+                    src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/profileicon/${
+                      matchSet[0].profileIconId
+                    }.png`}
+                    thumbnail
+                  />
+                )}
+              </Row>
+            </Col>
+          </Row>
+          {matchSet.slice(0, this.state.visible).map(match => (
             <Row key={match.id} className="m-2 border border-white">
               <Col sm={1} className="align-self-center">
                 <Row className="justify-content-center">{match.gameMode}</Row>
@@ -129,6 +155,9 @@ class SummonerInfoBox extends React.Component {
               </Col>
             </Row>
           ))}
+          <Row className="justify-content-center">
+            <Button onClick={this.showMoreMatches}>Load More</Button>
+          </Row>
         </Container>
       </div>
     )
@@ -143,7 +172,6 @@ const mapState = state => {
 
 const mapDispatch = dispatch => {
   return {
-    loadMatchSet: () => dispatch(fetchMatchDetails()),
     loadUserMatchSet: summonerId => dispatch(fetchUserDetails(summonerId))
   }
 }

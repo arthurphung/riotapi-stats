@@ -1,6 +1,6 @@
 body {
   font-family: sans-serif;
-  background-color: #2b2d42 !important;
+  background-color: #0b001c !important;
   color: white;
 }
 
@@ -24,6 +24,7 @@ form div {
 
 div {
   display: block;
+  color: white;
 }
 
 img {
@@ -37,4 +38,37 @@ img {
 .championPicture img {
   width: 48px;
   height: auto;
+}
+
+.poroLogo img {
+  width: 300px;
+  height: auto;
+}
+
+.root {
+  position: absolute;
+  top: 42px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+}
+
+.search img {
+  width: 15px;
+}
+
+.summonerName {
+  font-size: x-large;
+}
+
+.profileIcon img {
+  width: 76.16px;
+  height: auto;
+}
+
+.logo-text {
+  font-size: 100px;
+  font-family: 'Helvetica';
 }

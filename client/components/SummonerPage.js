@@ -1,6 +1,6 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {Link} from 'react-router-dom'
+import {Container, Row, Col} from 'react-bootstrap'
 
 import {
   fetchSummonerByName,
@@ -58,7 +58,8 @@ export class SummonerPage extends React.Component {
       opponent3: '',
       opponent4: '',
       opponent5: '',
-      summonerName: ''
+      summonerName: '',
+      profileIconId: ''
     }
 
     this.handleChange = this.handleChange.bind(this)
@@ -160,22 +161,6 @@ export class SummonerPage extends React.Component {
     return spellByIdCache[language][key]
   }
 
-  // NOTE: IN DDRAGON THE ID IS THE CLEAN NAME!!! It's also super-inconsistent, and broken at times.
-  // Cho'gath => Chogath, Wukong => Monkeyking, Fiddlesticks => Fiddlesticks/FiddleSticks (depending on what mood DDragon is in this patch)
-  // async getChampionByID(name, language = 'en_US') {
-  //   return await this.getLatestChampionDDragon(language)[name]
-  // }
-
-  // async main() {
-  //   const annie = await getChampionByKey(1, "en_US");
-  //   const leona = await getChampionByKey(89, "es_ES");
-  //   const brand = await getChampionByID("brand");
-
-  //   console.log(annie);
-  //   console.log(leona);
-  //   console.log(brand);
-  // }
-
   async getSummoner() {
     await this.props.fetchSummonerByName({
       params: {username: this.state.value}
@@ -184,35 +169,42 @@ export class SummonerPage extends React.Component {
 
     this.setState({
       accountId: this.props.summonerData.accountNameData.accountId,
-      summonerName: this.props.summonerData.accountNameData.name
+      summonerName: this.props.summonerData.accountNameData.name,
+      profileIconId: this.props.summonerData.accountNameData.profileIconId
     })
   }
 
   async getMatchList() {
     try {
       await this.props.fetchMatchListByAccId({
-        params: {accountId: this.state.accountId}
+        params: {
+          accountId: this.state.accountId,
+          summonerName: this.state.summonerName
+        }
       })
-      console.log(
-        'SUMMONER MATCH LIST DATA',
-        this.props.summonerData.accountMatchList
-      )
 
-      //Storing first 10 matches
-      let matchArray = []
-      let championArray = []
-      for (let i = 0; i < 40; i++) {
-        matchArray.push(
-          this.props.summonerData.accountMatchList.matches[i].gameId
+      if (this.props.summonerData.accountMatchList === 'Summoner exists') {
+        window.location.href = `summoner/na/${this.state.summonerName}`
+      } else {
+        console.log(
+          'SUMMONER MATCH LIST DATA',
+          this.props.summonerData.accountMatchList
         )
-        championArray.push(
-          this.props.summonerData.accountMatchList.matches[i].champion
-        )
+
+        //Storing first 40 matches
+        let matchArray = []
+        let championArray = []
+
+        this.props.summonerData.accountMatchList.matches.forEach(id => {
+          matchArray.push(id.gameId)
+          championArray.push(id.champion)
+        })
+
+        this.setState({
+          gameId: matchArray,
+          champion: championArray
+        })
       }
-      this.setState({
-        gameId: matchArray,
-        champion: championArray
-      })
     } catch (error) {
       console.log(error)
     }
@@ -229,20 +221,21 @@ export class SummonerPage extends React.Component {
       let championLevelArray = []
       let participantIdArray = []
 
-      for (let i = 0; i < this.state.gameId.length; i++) {
-        await this.props.fetchMatchDetailsByGameId({
-          params: {gameId: this.state.gameId[i]}
-        })
+      await Promise.all(
+        this.state.gameId.map(async id => {
+          await this.props.fetchMatchDetailsByGameId({
+            params: {gameId: id}
+          })
+          matchDetailsArray.push(this.props.summonerData.accountMatchDetails)
+          this.setState({
+            matchDetails: matchDetailsArray
+          })
 
-        matchDetailsArray.push(this.props.summonerData.accountMatchDetails)
-        this.setState({
-          matchDetails: matchDetailsArray
+          gameModesArray.push(
+            this.props.summonerData.accountMatchDetails.gameMode
+          )
         })
-
-        gameModesArray.push(
-          this.props.summonerData.accountMatchDetails.gameMode
-        )
-      }
+      )
 
       //Get Summoner Team ID, K/D/A, ...
       for (let i = 0; i < this.state.matchDetails.length; i++) {
@@ -458,13 +451,6 @@ export class SummonerPage extends React.Component {
         reducedOppArr.push(opponentsArr.slice(i, i + size))
       }
 
-      // for (let i = 0; i < teammatesArr.length; i++) {
-      //   this.props.createMatchTeammates({
-      //     teammatesId: teammatesArr[i],
-      //     opponentsId: opponentsArr[i]
-      //   })
-      // }
-
       this.setState({
         reducedTeamArr: reducedTeamArr,
         reducedOppArr: reducedOppArr
@@ -476,6 +462,7 @@ export class SummonerPage extends React.Component {
 
   getTeammates() {
     try {
+      this.setState(prevState => {})
       this.setState({
         teammate1: this.state.reducedTeamArr.map(match => match[0]),
         teammate2: this.state.reducedTeamArr.map(match => match[1]),
@@ -525,7 +512,7 @@ export class SummonerPage extends React.Component {
 
   async createSummonerBox() {
     try {
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < this.state.kills.length; i++) {
         await this.props.createPlayerBlock({
           gameMode: this.state.gameMode[i],
           championName: this.state.championName[i],
@@ -554,7 +541,8 @@ export class SummonerPage extends React.Component {
           opponent3: this.state.opponent3[i],
           opponent4: this.state.opponent4[i],
           opponent5: this.state.opponent5[i],
-          summonerName: this.state.summonerName
+          summonerName: this.state.summonerName,
+          profileIconId: this.state.profileIconId
         })
       }
     } catch (error) {
@@ -603,32 +591,42 @@ export class SummonerPage extends React.Component {
   async handleSubmit(event) {
     await this.search()
     event.preventDefault()
-    window.location.href = `summoner/na/${this.state.summonerName}`
+    // window.location.href = `summoner/na/${this.state.summonerName}`
   }
 
   render() {
     return (
-      <div>
-        <InputGroup className="mt-3 w-50">
-          <FormControl
-            placeholder="Summoner's username"
-            aria-label="Summoner's username"
-            aria-describedby="basic-addon2"
-            value={this.state.value}
-            onChange={this.handleChange}
-          />
-          <InputGroup.Append>
-            <Button variant="outline-secondary" onClick={this.handleSubmit}>
-              Search
-            </Button>
-            <Link
-              to={`/summoner/na/${this.state.summonerName}`}
-              className="btn btn-primary"
-            >
-              Find
-            </Link>
-          </InputGroup.Append>
-        </InputGroup>
+      <div className="root">
+        <Container className="poroLogo">
+          <Row>
+            <Col>
+              <Row className="justify-content-center logo-text">Porology</Row>
+              <Row className="justify-content-center">
+                <img src="/poroLogo.png" />
+              </Row>
+              <Row className="justify-content-center">
+                <InputGroup className="w-50">
+                  <FormControl
+                    placeholder="Search summoner"
+                    aria-label="Search summoner"
+                    aria-describedby="basic-addon2"
+                    value={this.state.value}
+                    onChange={this.handleChange}
+                  />
+                  <InputGroup.Append>
+                    <Button
+                      className="search btn-light"
+                      variant="outline-secondary"
+                      onClick={this.handleSubmit}
+                    >
+                      <img src="/search.svg" />
+                    </Button>
+                  </InputGroup.Append>
+                </InputGroup>
+              </Row>
+            </Col>
+          </Row>
+        </Container>
       </div>
     )
   }

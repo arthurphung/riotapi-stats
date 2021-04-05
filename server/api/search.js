@@ -26,14 +26,21 @@ router.get('/summoner', async (req, res, next) => {
 //Get Match-list for games played on given account ID
 router.get('/matches', async (req, res, next) => {
   try {
-    let {accountId} = req.query
-    console.log('account id here ==>', accountId)
-    let url = `https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/${accountId}?api_key=${riotKey}`
+    console.log(req.query.summonerName)
+    const findSummoner = await PlayerDetails.findOne({
+      where: {summonerName: req.query.summonerName}
+    })
+    if (findSummoner) {
+      res.json('Summoner exists')
+    } else {
+      let {accountId} = req.query
+      console.log('account id here ==>', accountId)
+      let url = `https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/${accountId}?api_key=${riotKey}`
 
-    const response = await axios.get(url)
-    let matches = response.data
-    res.json(matches)
-    // console.log(matches)
+      const response = await axios.get(url)
+      let matches = response.data
+      res.json(matches)
+    }
   } catch (error) {
     next(error)
   }
@@ -58,19 +65,8 @@ router.get('/gameDetails', async (req, res, next) => {
 //Post Game Details for 10 matches
 router.post('/gameDetails', async (req, res, next) => {
   try {
-    // console.log(req.body)
     const createdPlayerBlock = await PlayerDetails.create(req.body)
     res.json(createdPlayerBlock)
-  } catch (error) {
-    next(error)
-  }
-})
-
-//Get Game Details for 10 matches
-router.get('/matchDetails', async (req, res, next) => {
-  try {
-    const matchSet = await PlayerDetails.findAll()
-    res.json(matchSet)
   } catch (error) {
     next(error)
   }

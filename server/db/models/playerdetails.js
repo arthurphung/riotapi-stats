@@ -113,6 +113,10 @@ const PlayerDetails = db.define('playerdetails', {
   summonerName: {
     type: Sequelize.TEXT,
     allowNull: false
+  },
+  profileIconId: {
+    type: Sequelize.INTEGER,
+    allowNull: false
   }
 })
 
