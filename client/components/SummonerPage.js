@@ -220,17 +220,16 @@ export class SummonerPage extends React.Component {
       let assistsArray = []
       let championLevelArray = []
       let participantIdArray = []
+      const delay = interval =>
+        new Promise(resolve => setTimeout(resolve, interval))
 
       await Promise.all(
-        this.state.gameId.map(async id => {
+        this.state.gameId.slice(0, 50).map(async id => {
+          await delay(5000)
           await this.props.fetchMatchDetailsByGameId({
             params: {gameId: id}
           })
           matchDetailsArray.push(this.props.summonerData.accountMatchDetails)
-          this.setState({
-            matchDetails: matchDetailsArray
-          })
-
           gameModesArray.push(
             this.props.summonerData.accountMatchDetails.gameMode
           )
@@ -275,7 +274,8 @@ export class SummonerPage extends React.Component {
         deaths: deathsArray,
         assists: assistsArray,
         champLevel: championLevelArray,
-        participantId: participantIdArray
+        participantId: participantIdArray,
+        matchDetails: matchDetailsArray
       })
     } catch (error) {
       console.log(error)
@@ -600,7 +600,9 @@ export class SummonerPage extends React.Component {
         <Container className="poroLogo">
           <Row>
             <Col>
-              <Row className="justify-content-center logo-text">Porology</Row>
+              <Row className="justify-content-center logo-text">
+                <img src="/porolytix.png" />
+              </Row>
               <Row className="justify-content-center">
                 <img src="/poroLogo.png" />
               </Row>
