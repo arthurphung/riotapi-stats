@@ -1,25 +1,54 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {fetchMatchDetails, fetchMatchTeams} from '../store/summoner'
+import {fetchUserDetails} from '../store/summoner'
 
-import {Container} from 'react-bootstrap'
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
+import {Container, Row, Col, Button, Image} from 'react-bootstrap'
 
 class SummonerInfoBox extends React.Component {
+  constructor() {
+    super()
+    this.state = {
+      visible: 10
+    }
+    this.showMoreMatches = this.showMoreMatches.bind(this)
+  }
+
   componentDidMount() {
-    this.props.loadMatchSet()
+    this.props.loadUserMatchSet(this.props.match.params.summonerId)
+  }
+
+  showMoreMatches() {
+    this.setState(prevState => ({
+      visible: prevState.visible + 10
+    }))
   }
 
   render() {
-    const matchSet = this.props.summonerData.matchSet
+    const matchSet = this.props.summonerData.userMatchSet
     console.log(matchSet, 'MATCHSET DATA')
 
     return (
-      <div className="root">
+      <div>
         <Container>
-          {matchSet.map(match => (
-            <Row key={match.id} className="m-5 border border-white">
+          <Row className="m-2">
+            <Col sm={1}>
+              <Row className="summonerName justify-content-center">
+                {matchSet[0] !== undefined && matchSet[0].summonerName}
+              </Row>
+              <Row className="profileIcon justify-content-center">
+                {matchSet[0] !== undefined && (
+                  <Image
+                    src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/profileicon/${
+                      matchSet[0].profileIconId
+                    }.png`}
+                    thumbnail
+                  />
+                )}
+              </Row>
+            </Col>
+          </Row>
+          {matchSet.slice(0, this.state.visible).map(match => (
+            <Row key={match.id} className="m-2 border border-white">
               <Col sm={1} className="align-self-center">
                 <Row className="justify-content-center">{match.gameMode}</Row>
                 <Row className="justify-content-center">
@@ -27,9 +56,9 @@ class SummonerInfoBox extends React.Component {
                 </Row>
               </Col>
               <Col sm={2} className="align-self-center">
-                <Row>
-                  <Col>
-                    <Row className="justify-content-center championPicture">
+                <Row className="justify-content-center">
+                  <Col sm={6}>
+                    <Row className="justify-content-end championPicture">
                       <img
                         src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/champion/${
                           match.championName
@@ -37,7 +66,7 @@ class SummonerInfoBox extends React.Component {
                       />
                     </Row>
                   </Col>
-                  <Col>
+                  <Col sm={6}>
                     <Row>
                       <img
                         src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/spell/${
@@ -64,7 +93,7 @@ class SummonerInfoBox extends React.Component {
               <Col sm={4} className="align-self-center">
                 <Row>
                   <Col>
-                    <Row className="justify-content-sm-center">
+                    <Row className="justify-content-sm-end">
                       <img
                         src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
                           match.item0
@@ -81,7 +110,7 @@ class SummonerInfoBox extends React.Component {
                         }.png`}
                       />
                     </Row>
-                    <Row className="justify-content-sm-center">
+                    <Row className="justify-content-sm-end">
                       <img
                         src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
                           match.item3
@@ -99,12 +128,14 @@ class SummonerInfoBox extends React.Component {
                       />
                     </Row>
                   </Col>
-                  <Col>
-                    <img
-                      src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
-                        match.item6
-                      }.png`}
-                    />
+                  <Col className="align-self-center">
+                    <Row>
+                      <img
+                        src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/item/${
+                          match.item6
+                        }.png`}
+                      />
+                    </Row>
                   </Col>
                 </Row>
               </Col>
@@ -124,6 +155,9 @@ class SummonerInfoBox extends React.Component {
               </Col>
             </Row>
           ))}
+          <Row className="justify-content-center">
+            <Button onClick={this.showMoreMatches}>Load More</Button>
+          </Row>
         </Container>
       </div>
     )
@@ -138,7 +172,7 @@ const mapState = state => {
 
 const mapDispatch = dispatch => {
   return {
-    loadMatchSet: () => dispatch(fetchMatchDetails())
+    loadUserMatchSet: summonerId => dispatch(fetchUserDetails(summonerId))
   }
 }
 

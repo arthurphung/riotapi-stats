@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const axios = require('axios')
-const {Summoners, Players} = require('../db/models')
+const {PlayerDetails, Summoners} = require('../db/models')
 require('dotenv').config()
 
 const riotKey = process.env.API_KEY
@@ -26,14 +26,21 @@ router.get('/summoner', async (req, res, next) => {
 //Get Match-list for games played on given account ID
 router.get('/matches', async (req, res, next) => {
   try {
-    let {accountId} = req.query
-    console.log('account id here ==>', accountId)
-    let url = `https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/${accountId}?api_key=${riotKey}`
+    console.log(req.query.summonerName)
+    const findSummoner = await PlayerDetails.findOne({
+      where: {summonerName: req.query.summonerName}
+    })
+    if (findSummoner) {
+      res.json('Summoner exists')
+    } else {
+      let {accountId} = req.query
+      console.log('account id here ==>', accountId)
+      let url = `https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/${accountId}?api_key=${riotKey}`
 
-    const response = await axios.get(url)
-    let matches = response.data
-    res.json(matches)
-    // console.log(matches)
+      const response = await axios.get(url)
+      let matches = response.data
+      res.json(matches)
+    }
   } catch (error) {
     next(error)
   }
@@ -58,69 +65,34 @@ router.get('/gameDetails', async (req, res, next) => {
 //Post Game Details for 10 matches
 router.post('/gameDetails', async (req, res, next) => {
   try {
-    // console.log(req.body)
-    const createdPlayerBlock = await Summoners.create(req.body)
+    const createdPlayerBlock = await PlayerDetails.create(req.body)
     res.json(createdPlayerBlock)
   } catch (error) {
     next(error)
   }
 })
 
-//Get Game Details for 10 matches
-router.get('/matchDetails', async (req, res, next) => {
-  try {
-    const matchSet = await Summoners.findAll()
-
-    const teammates = await Players.findAll({
-      attributes: ['teammatesId']
-    })
-
-    const opponents = await Players.findAll({
-      attributes: ['opponentsId']
-    })
-
-    let teammatesArr = teammates.map(el => el.teammatesId)
-    let opponentsArr = opponents.map(el => el.opponentsId)
-
-    let reducedTeamObj = {}
-    let reducedOppObj = {}
-    let size = 5
-
-    for (let i = 0; i < teammatesArr.length; i += size) {
-      reducedTeamObj.teammates = teammatesArr.slice(i, i + size)
-      reducedOppObj.opponents = opponentsArr.slice(0, size)
-    }
-    res.json(matchSet)
-  } catch (error) {
-    next(error)
-  }
-})
-
-//Post Teammates
-router.post('/teams', async (req, res, next) => {
+//Post Summoner Name for User model
+router.post('/summoner', async (req, res, next) => {
   try {
     console.log(req.body)
-    const createdTeam = await Players.create(req.body)
-    res.json(createdTeam)
+    const createdSummonerName = await Summoners.create(req.body)
+    res.json(createdSummonerName)
   } catch (error) {
     next(error)
   }
 })
 
-//Get Game Details for 10 matches
-router.get('/teams', async (req, res, next) => {
+//Get specific user's match history
+router.get('/:summonerId', async (req, res, next) => {
   try {
-    const teammates = await Players.findAll({
-      attributes: ['teammatesId']
+    console.log(req.params.summonerId)
+    const userMatchSet = await PlayerDetails.findAll({
+      where: {
+        summonerName: req.params.summonerId
+      }
     })
-
-    const opponents = await Players.findAll({
-      attributes: ['opponentsId']
-    })
-
-    let results = []
-    results.push(teammates, opponents)
-    res.json(results)
+    res.json(userMatchSet)
   } catch (error) {
     next(error)
   }

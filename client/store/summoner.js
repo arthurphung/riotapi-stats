@@ -9,6 +9,8 @@ const ADD_PLAYER_BLOCK = 'ADD_PLAYER_BLOCK'
 const GET_MATCH_DETAILS = 'GET_MATCH_DETAILS'
 const ADD_MATCH_TEAMMATES = 'GET_MATCH_TEAMMATES'
 const GET_TEAMS = 'GET_TEAMS'
+const ADD_SUMMONER_NAME = 'ADD_SUMMONER_NAME'
+const GET_USER_DETAILS = 'GET_USER_DETAILS'
 
 export const findSummoner = summoner => ({
   type: FIND_SUMMONER,
@@ -55,16 +57,20 @@ export const addMatchTeammates = ids => ({
   ids
 })
 
-export const getTeams = ids => ({
-  type: GET_TEAMS,
-  ids
+export const addSummonerName = id => ({
+  type: ADD_SUMMONER_NAME,
+  id
+})
+
+export const getUserDetails = user => ({
+  type: GET_USER_DETAILS,
+  user
 })
 
 export const fetchSummonerByName = summoner => {
   return async dispatch => {
     try {
       const {data} = await axios.get('/api/search/summoner', summoner)
-      // console.log(data)
       dispatch(findSummoner(data))
     } catch (error) {
       console.log(error)
@@ -76,7 +82,6 @@ export const fetchMatchListByAccId = accountId => {
   return async dispatch => {
     try {
       const {data} = await axios.get('/api/search/matches', accountId)
-      // console.log(data)
       dispatch(findSummonerMatchList(data))
     } catch (error) {
       console.log(error)
@@ -88,7 +93,6 @@ export const fetchMatchDetailsByGameId = gameId => {
   return async dispatch => {
     try {
       const {data} = await axios.get('/api/search/gameDetails', gameId)
-      // console.log(data)
       dispatch(getSummonerMatchDetails(data))
     } catch (error) {
       console.log(error)
@@ -114,7 +118,6 @@ export const fetchMatchDetails = () => {
   return async dispatch => {
     try {
       const {data} = await axios.get('/api/search/matchDetails')
-      console.log(data)
       dispatch(getMatchDetails(data))
     } catch (error) {
       console.log(error)
@@ -126,7 +129,6 @@ export const createMatchTeammates = ids => {
   return async dispatch => {
     try {
       const {data} = await axios.post('/api/search/teams', ids)
-      // console.log(data)
       dispatch(addMatchTeammates(data))
     } catch (error) {
       console.log(error)
@@ -134,27 +136,22 @@ export const createMatchTeammates = ids => {
   }
 }
 
-export const fetchMatchTeams = () => {
+export const createSummonerName = id => {
   return async dispatch => {
     try {
-      const {data} = await axios.get('/api/search/teams')
+      const createdSummonerName = await axios.post('/api/search/summoner', id)
+      dispatch(addSummonerName(createdSummonerName))
+    } catch (error) {
+      console.log(error)
+    }
+  }
+}
 
-      let teammates = data[0]
-      let opponents = data[1]
-
-      let teammatesArr = teammates.map(el => el.teammatesId)
-      let opponentsArr = opponents.map(el => el.opponentsId)
-
-      let reducedTeamArr = []
-      let reducedOppArr = []
-      let size = 5
-
-      for (let i = 0; i < teammatesArr.length; i += size) {
-        reducedTeamArr.push(teammatesArr.slice(i, i + size))
-        reducedOppArr.push(opponentsArr.slice(i, i + size))
-      }
-
-      dispatch(getTeams(result))
+export const fetchUserDetails = summonerId => {
+  return async dispatch => {
+    try {
+      const {data} = await axios.get(`/api/search/${summonerId}`)
+      dispatch(getUserDetails(data))
     } catch (error) {
       console.log(error)
     }
@@ -166,7 +163,8 @@ const initialState = {
   accountMatchList: [],
   accountMatchDetails: [],
   matchSet: [],
-  teamSet: []
+  teamSet: [],
+  userMatchSet: []
 }
 
 // Take a look at app/redux/index.js to see where this reducer is
@@ -187,6 +185,9 @@ export default function summonerReducer(state = initialState, action) {
     }
     case GET_TEAMS: {
       return {...state, teamSet: action.ids}
+    }
+    case GET_USER_DETAILS: {
+      return {...state, userMatchSet: action.user}
     }
     default:
       return state
