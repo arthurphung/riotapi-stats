@@ -1,6 +1,13 @@
 import React from 'react'
 import {connect} from 'react-redux'
-import {Container, Row, Col} from 'react-bootstrap'
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  InputGroup,
+  FormControl
+} from 'react-bootstrap'
 
 import {
   fetchSummonerByName,
@@ -11,9 +18,7 @@ import {
   createSummonerName
 } from '../store/summoner'
 
-import Button from 'react-bootstrap/Button'
-import InputGroup from 'react-bootstrap/InputGroup'
-import FormControl from 'react-bootstrap/FormControl'
+import SyncLoader from 'react-spinners/HashLoader'
 
 let championByIdCache = {}
 let championJson = {}
@@ -59,7 +64,8 @@ export class SummonerPage extends React.Component {
       opponent4: '',
       opponent5: '',
       summonerName: '',
-      profileIconId: ''
+      profileIconId: '',
+      loaded: true
     }
 
     this.handleChange = this.handleChange.bind(this)
@@ -222,7 +228,7 @@ export class SummonerPage extends React.Component {
       let participantIdArray = []
 
       await Promise.all(
-        this.state.gameId.map(async id => {
+        this.state.gameId.slice(0, 50).map(async id => {
           await this.props.fetchMatchDetailsByGameId({
             params: {gameId: id}
           })
@@ -462,14 +468,13 @@ export class SummonerPage extends React.Component {
 
   getTeammates() {
     try {
-      this.setState(prevState => {})
-      this.setState({
-        teammate1: this.state.reducedTeamArr.map(match => match[0]),
-        teammate2: this.state.reducedTeamArr.map(match => match[1]),
-        teammate3: this.state.reducedTeamArr.map(match => match[2]),
-        teammate4: this.state.reducedTeamArr.map(match => match[3]),
-        teammate5: this.state.reducedTeamArr.map(match => match[4])
-      })
+      this.setState(prevState => ({
+        teammate1: prevState.reducedTeamArr.map(match => match[0]),
+        teammate2: prevState.reducedTeamArr.map(match => match[1]),
+        teammate3: prevState.reducedTeamArr.map(match => match[2]),
+        teammate4: prevState.reducedTeamArr.map(match => match[3]),
+        teammate5: prevState.reducedTeamArr.map(match => match[4])
+      }))
     } catch (error) {
       console.log(error)
     }
@@ -477,13 +482,13 @@ export class SummonerPage extends React.Component {
 
   getOpponents() {
     try {
-      this.setState({
-        opponent1: this.state.reducedOppArr.map(match => match[0]),
-        opponent2: this.state.reducedOppArr.map(match => match[1]),
-        opponent3: this.state.reducedOppArr.map(match => match[2]),
-        opponent4: this.state.reducedOppArr.map(match => match[3]),
-        opponent5: this.state.reducedOppArr.map(match => match[4])
-      })
+      this.setState(prevState => ({
+        opponent1: prevState.reducedOppArr.map(match => match[0]),
+        opponent2: prevState.reducedOppArr.map(match => match[1]),
+        opponent3: prevState.reducedOppArr.map(match => match[2]),
+        opponent4: prevState.reducedOppArr.map(match => match[3]),
+        opponent5: prevState.reducedOppArr.map(match => match[4])
+      }))
     } catch (error) {
       console.log(error)
     }
@@ -555,6 +560,7 @@ export class SummonerPage extends React.Component {
       await this.props.createSummonerName({
         summonerId: this.state.summonerName
       })
+      window.location.href = `summoner/na/${this.state.summonerName}`
     } catch (error) {
       console.log(error)
     }
@@ -589,44 +595,64 @@ export class SummonerPage extends React.Component {
   }
 
   async handleSubmit(event) {
+    this.setState({
+      loaded: false
+    })
     await this.search()
     event.preventDefault()
-    // window.location.href = `summoner/na/${this.state.summonerName}`
   }
 
   render() {
+    const loaded = this.state.loaded
     return (
       <div className="root">
-        <Container className="poroLogo">
-          <Row>
-            <Col>
-              <Row className="justify-content-center logo-text">Porology</Row>
-              <Row className="justify-content-center">
-                <img src="/poroLogo.png" />
-              </Row>
-              <Row className="justify-content-center">
-                <InputGroup className="w-50">
-                  <FormControl
-                    placeholder="Search summoner"
-                    aria-label="Search summoner"
-                    aria-describedby="basic-addon2"
-                    value={this.state.value}
-                    onChange={this.handleChange}
-                  />
-                  <InputGroup.Append>
-                    <Button
-                      className="search btn-light"
-                      variant="outline-secondary"
-                      onClick={this.handleSubmit}
-                    >
-                      <img src="/search.svg" />
-                    </Button>
-                  </InputGroup.Append>
-                </InputGroup>
-              </Row>
-            </Col>
-          </Row>
-        </Container>
+        {loaded ? (
+          <Container className="poroLogo">
+            <Row>
+              <Col>
+                <Row className="justify-content-center">
+                  <img src="/porolytix.png" />
+                </Row>
+                <Row className="justify-content-center">
+                  <img src="/poroLogo.png" />
+                </Row>
+                <Row className="justify-content-center">
+                  <InputGroup className="w-50">
+                    <FormControl
+                      placeholder="Search summoner"
+                      aria-label="Search summoner"
+                      aria-describedby="basic-addon2"
+                      value={this.state.value}
+                      onChange={this.handleChange}
+                    />
+                    <InputGroup.Append>
+                      <Button
+                        className="search btn-light"
+                        variant="outline-secondary"
+                        onClick={this.handleSubmit}
+                      >
+                        <img src="/search.svg" />
+                      </Button>
+                    </InputGroup.Append>
+                  </InputGroup>
+                </Row>
+              </Col>
+            </Row>
+          </Container>
+        ) : (
+          <Container>
+            <Row>
+              <Col className="align-self-items">
+                <Row className="justify-content-center">
+                  <SyncLoader color="0682F8" size={150} />
+                </Row>
+                <Row className="justify-content-center m-4">
+                  Sit tight! We're gathering your info.
+                </Row>
+              </Col>
+            </Row>
+          </Container>
+        )}
       </div>
     )
   }
