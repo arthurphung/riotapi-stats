@@ -41,7 +41,7 @@ class SummonerInfoBox extends React.Component {
                     src={`http://ddragon.leagueoflegends.com/cdn/11.7.1/img/profileicon/${
                       matchSet[0].profileIconId
                     }.png`}
-                    rounded
+                    thumbnail
                   />
                 )}
               </Row>
