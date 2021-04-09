@@ -18,7 +18,7 @@ import {
   createSummonerName
 } from '../store/summoner'
 
-import SyncLoader from 'react-spinners/HashLoader'
+import HashLoader from 'react-spinners/HashLoader'
 
 let championByIdCache = {}
 let championJson = {}
@@ -644,7 +644,7 @@ export class SummonerPage extends React.Component {
             <Row>
               <Col className="align-self-items">
                 <Row className="justify-content-center">
-                  <SyncLoader color="0682F8" size={150} />
+                  <HashLoader color="#0682F8" size={150} />
                 </Row>
                 <Row className="justify-content-center m-4">
                   Sit tight! We're gathering your info.
