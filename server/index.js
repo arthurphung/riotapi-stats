@@ -2,21 +2,19 @@ const path = require('path')
 const express = require('express')
 const morgan = require('morgan')
 const compression = require('compression')
-const session = require('express-session')
-const passport = require('passport')
-const SequelizeStore = require('connect-session-sequelize')(session.Store)
 const db = require('./db')
-const sessionStore = new SequelizeStore({db})
 const PORT = process.env.PORT || 8080
+const enforce = require('express-sslify')
+const http = require('http')
 const app = express()
-const socketio = require('socket.io')
+
 module.exports = app
 
-// This is a global Mocha hook, used for resource cleanup.
+// This is a global Mocha hook, used for re1urce cleanup.
 // Otherwise, Mocha v4+ never quits after tests.
-if (process.env.NODE_ENV === 'test') {
-  after('close the session store', () => sessionStore.stopExpiringSessions())
-}
+// if (process.env.NODE_ENV === 'test') {
+//   after('close the session store', () => sessionStore.stopExpiringSessions())
+// }
 
 /**
  * In your development environment, you can keep all of your
@@ -28,19 +26,13 @@ if (process.env.NODE_ENV === 'test') {
  */
 if (process.env.NODE_ENV !== 'production') require('../secrets')
 
-// passport registration
-passport.serializeUser((user, done) => done(null, user.id))
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await db.models.user.findByPk(id)
-    done(null, user)
-  } catch (err) {
-    done(err)
-  }
-})
-
 const createApp = () => {
+  // enable SSL redirect: comment out this line to run local host and make sure it is http:/ not https:/
+  if (app.get('env') === 'production') {
+    app.use(enforce.HTTPS({trustProtoHeader: true}))
+  }
+  //app.use(enforce.HTTPS({trustProtoHeader: true}))
+
   // logging middleware
   app.use(morgan('dev'))
 
@@ -51,20 +43,7 @@ const createApp = () => {
   // compression middleware
   app.use(compression())
 
-  // session middleware with passport
-  app.use(
-    session({
-      secret: process.env.SESSION_SECRET || 'my best friend is Cody',
-      store: sessionStore,
-      resave: false,
-      saveUninitialized: false
-    })
-  )
-  app.use(passport.initialize())
-  app.use(passport.session())
-
-  // auth and api routes
-  // app.use('/auth', require('./auth'))
+  // api routes
   app.use('/api', require('./api'))
 
   // static file-serving middleware
@@ -82,8 +61,17 @@ const createApp = () => {
   })
 
   // sends index.html
-  app.use('*', (req, res) => {
+  app.use('*', (req, res, next) => {
     res.sendFile(path.join(__dirname, '..', 'public/index.html'))
+    // if (
+    //   'https' !== req.headers['x-forwarded-proto'] &&
+    //   'production' === process.env.NODE_ENV
+    // ) {
+    //   res.redirect('https://' + req.hostname + req.url)
+    // } else {
+    //   // Continue to other routes if we're not redirecting
+    //   next()
+    // }
   })
 
   // error handling endware
@@ -96,19 +84,30 @@ const createApp = () => {
 
 const startListening = () => {
   // start listening (and create a 'server' object representing our server)
-  const server = app.listen(PORT, () =>
-    console.log(`Mixing it up on port ${PORT}`)
-  )
+  const server = http
+    .createServer(app)
+    .listen(PORT, () => console.log(`Mixing it up on port ${PORT}`))
 
-  // set up our socket control center
-  // const io = socketio(server)
-  // require('./socket')(io)
+  // clean exit the server and node process when one of these events occur
+  const arr = [
+    `exit`,
+    `SIGINT`,
+    `SIGUSR1`,
+    `SIGUSR2`,
+    `uncaughtException`,
+    `SIGTERM`
+  ]
+  arr.forEach(event => {
+    process.on(event, () => {
+      server.close(() => process.exit())
+    })
+  })
 }
 
 const syncDb = () => db.sync()
 
 async function bootApp() {
-  await sessionStore.sync()
+  // await sessionStore.sync()
   await syncDb()
   await createApp()
   await startListening()
