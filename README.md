@@ -1,4 +1,4 @@
-# PorolytiX
+# PorolytiX (CURRENTLY IN PROGRESS OF BUILDING)
 
 This is my personal project using Riot Games's Developer API to create a web app for users to search a player's match history and details.
 
