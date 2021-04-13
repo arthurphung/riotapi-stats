@@ -65,7 +65,8 @@ export class SummonerPage extends React.Component {
       opponent5: '',
       summonerName: '',
       profileIconId: '',
-      loaded: true
+      loaded: true,
+      error: false
     }
 
     this.handleChange = this.handleChange.bind(this)
@@ -89,6 +90,7 @@ export class SummonerPage extends React.Component {
     )
     this.getSummonerSpellByKey = this.getSummonerSpellByKey.bind(this)
     this.createSummonerNameList = this.createSummonerNameList.bind(this)
+    this.errorMsg = this.errorMsg.bind(this)
   }
 
   async getLatestChampionDDragon(language = 'en_US') {
@@ -168,16 +170,28 @@ export class SummonerPage extends React.Component {
   }
 
   async getSummoner() {
-    await this.props.fetchSummonerByName({
-      params: {username: this.state.value}
-    })
-    console.log('SUMMONER NAME DATA', this.props.summonerData.accountNameData)
+    try {
+      await this.props.fetchSummonerByName({
+        params: {username: this.state.value}
+      })
+      console.log('SUMMONER NAME DATA', this.props.summonerData.accountNameData)
 
-    this.setState({
-      accountId: this.props.summonerData.accountNameData.accountId,
-      summonerName: this.props.summonerData.accountNameData.name,
-      profileIconId: this.props.summonerData.accountNameData.profileIconId
-    })
+      if (
+        this.props.summonerData.accountNameData === 'Summoner does not exist'
+      ) {
+        this.errorMsg()
+      } else {
+        this.setState({
+          accountId: this.props.summonerData.accountNameData.accountId,
+          summonerName: this.props.summonerData.accountNameData.name,
+          profileIconId: this.props.summonerData.accountNameData.profileIconId,
+          error: false
+        })
+      }
+    } catch (error) {
+      console.log(error)
+      this.errorMsg()
+    }
   }
 
   async getMatchList() {
@@ -566,9 +580,19 @@ export class SummonerPage extends React.Component {
     }
   }
 
+  errorMsg() {
+    this.setState({
+      error: true,
+      loaded: true
+    })
+  }
+
   async search() {
     try {
       await this.getSummoner()
+      if (this.state.error === true) {
+        return
+      }
       await this.getMatchList()
       await this.getMatchDetails()
       await this.getMatchOutcome()
@@ -603,7 +627,7 @@ export class SummonerPage extends React.Component {
   }
 
   render() {
-    const loaded = this.state.loaded
+    const {error, loaded} = this.state
     return (
       <div className="root">
         {loaded ? (
@@ -616,7 +640,7 @@ export class SummonerPage extends React.Component {
                 <Row className="justify-content-center">
                   <img src="/poroLogo.png" />
                 </Row>
-                <Row className="justify-content-center">
+                <Row className="justify-content-center mb-2">
                   <InputGroup className="w-50">
                     <FormControl
                       placeholder="Search summoner"
@@ -635,6 +659,13 @@ export class SummonerPage extends React.Component {
                       </Button>
                     </InputGroup.Append>
                   </InputGroup>
+                </Row>
+                <Row className="justify-content-center">
+                  {error && (
+                    <div className="error">
+                      Oops! That summoner name does not exist, please try again.
+                    </div>
+                  )}
                 </Row>
               </Col>
             </Row>

@@ -15,18 +15,27 @@ router.get('/summoner', async (req, res, next) => {
     let url = `https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${username}?api_key=${riotKey}`
 
     const response = await axios.get(url)
+    // console.log(response, "RES")
+    // console.log(response.status, "reserkgjnergkjnergkjn")
+    // if (response.status === 404) {
+    //   let errorMsg = 'ERROR'
+    //   res.json(errorMsg)
+    // } else {
     let data = response.data
+    // console.log(data, "DATA")
     res.json(data)
-    console.log(data)
   } catch (error) {
     next(error)
+    if (error.response.status === 404) {
+      res.json('Summoner does not exist')
+    }
   }
 })
 
 //Get Match-list for games played on given account ID
 router.get('/matches', async (req, res, next) => {
   try {
-    console.log(req.query.summonerName)
+    // console.log(req.query.summonerName)
     const findSummoner = await PlayerDetails.findOne({
       where: {summonerName: req.query.summonerName}
     })
@@ -34,7 +43,7 @@ router.get('/matches', async (req, res, next) => {
       res.json('Summoner exists')
     } else {
       let {accountId} = req.query
-      console.log('account id here ==>', accountId)
+      // console.log('account id here ==>', accountId)
       let url = `https://na1.api.riotgames.com/lol/match/v4/matchlists/by-account/${accountId}?api_key=${riotKey}`
 
       const response = await axios.get(url)
@@ -50,7 +59,7 @@ router.get('/matches', async (req, res, next) => {
 router.get('/gameDetails', async (req, res, next) => {
   try {
     let {gameId} = req.query
-    console.log('game id here ==>', gameId)
+    // console.log('game id here ==>', gameId)
     let url = `https://na1.api.riotgames.com/lol/match/v4/matches/${gameId}?api_key=${riotKey}`
 
     const response = await axios.get(url)
@@ -75,7 +84,7 @@ router.post('/gameDetails', async (req, res, next) => {
 //Post Summoner Name for User model
 router.post('/summoner', async (req, res, next) => {
   try {
-    console.log(req.body)
+    // console.log(req.body)
     const createdSummonerName = await Summoners.create(req.body)
     res.json(createdSummonerName)
   } catch (error) {
@@ -86,7 +95,7 @@ router.post('/summoner', async (req, res, next) => {
 //Get specific user's match history
 router.get('/:summonerId', async (req, res, next) => {
   try {
-    console.log(req.params.summonerId)
+    // console.log(req.params.summonerId)
     const userMatchSet = await PlayerDetails.findAll({
       where: {
         summonerName: req.params.summonerId
